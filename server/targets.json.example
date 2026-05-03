@@ -1,0 +1,14 @@
+[
+  {
+    "targets": ["gpu01.example.lab:9745"],
+    "labels": {"node": "gpu01"}
+  },
+  {
+    "targets": ["gpu02.example.lab:9745"],
+    "labels": {"node": "gpu02"}
+  },
+  {
+    "targets": ["10.0.0.10:9745"],
+    "labels": {"node": "gpu03"}
+  }
+]

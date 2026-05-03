@@ -1,0 +1,14 @@
+[Unit]
+Description=GPU Prometheus Exporter
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/opt/gpu-exporter/venv/bin/python /opt/gpu-exporter/exporter.py --port 9745
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

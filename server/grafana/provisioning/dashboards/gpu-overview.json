@@ -1,0 +1,292 @@
+{
+  "id": null,
+  "uid": "gpu-overview-v2",
+  "title": "GPU Cluster Overview",
+  "tags": ["gpu"],
+  "timezone": "browser",
+  "schemaVersion": 37,
+  "refresh": "20s",
+  "templating": {
+    "list": [
+      {
+        "name": "node",
+        "type": "query",
+        "query": {
+          "query": "label_values(gpu_info, node)",
+          "refId": "PrometheusVariableQuery"
+        },
+        "current": {
+          "text": ["All"],
+          "value": ["$__all"]
+        },
+        "includeAll": true,
+        "multi": true,
+        "allValue": ".+",
+        "label": "Node",
+        "hide": 0
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Avg Utilization",
+      "type": "stat",
+      "datasource": {"uid": "Prometheus", "type": "prometheus"},
+      "targets": [
+        {
+          "expr": "avg(gpu_utilization_percent)",
+          "legendFormat": ""
+        }
+      ],
+      "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0},
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 70},
+              {"color": "red", "value": 90}
+            ]
+          }
+        }
+      },
+      "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "center"}
+    },
+    {
+      "id": 2,
+      "title": "Memory Usage",
+      "type": "stat",
+      "datasource": {"uid": "Prometheus", "type": "prometheus"},
+      "targets": [
+        {
+          "expr": "sum(gpu_memory_used_bytes) / sum(gpu_memory_total_bytes) * 100",
+          "legendFormat": ""
+        }
+      ],
+      "gridPos": {"h": 4, "w": 6, "x": 6, "y": 0},
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 70},
+              {"color": "red", "value": 90}
+            ]
+          }
+        }
+      },
+      "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "center"}
+    },
+    {
+      "id": 3,
+      "title": "Total Power",
+      "type": "stat",
+      "datasource": {"uid": "Prometheus", "type": "prometheus"},
+      "targets": [
+        {
+          "expr": "sum(gpu_power_draw_watts)",
+          "legendFormat": ""
+        }
+      ],
+      "gridPos": {"h": 4, "w": 6, "x": 12, "y": 0},
+      "fieldConfig": {
+        "defaults": {
+          "unit": "watt",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "blue", "value": null}
+            ]
+          }
+        }
+      },
+      "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "center"}
+    },
+    {
+      "id": 4,
+      "title": "GPU Count",
+      "type": "stat",
+      "datasource": {"uid": "Prometheus", "type": "prometheus"},
+      "targets": [
+        {
+          "expr": "count(gpu_info)",
+          "legendFormat": ""
+        }
+      ],
+      "gridPos": {"h": 4, "w": 6, "x": 18, "y": 0},
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "blue", "value": null}
+            ]
+          }
+        }
+      },
+      "options": {"colorMode": "value", "graphMode": "none", "justifyMode": "center"}
+    },
+    {
+      "id": 10,
+      "title": "User Memory Ranking",
+      "type": "barchart",
+      "datasource": {"uid": "Prometheus", "type": "prometheus"},
+      "targets": [
+        {
+          "expr": "sum(gpu_process_memory_bytes) by (container)",
+          "legendFormat": "{{container}}",
+          "instant": true
+        }
+      ],
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 4},
+      "fieldConfig": {
+        "defaults": {"unit": "bytes"}
+      },
+      "options": {
+        "orientation": "horizontal",
+        "showValue": "auto",
+        "stacking": "none",
+        "groupWidth": 0.7,
+        "barWidth": 0.5
+      },
+      "transformations": [
+        {
+          "id": "labelsToFields",
+          "options": {
+            "mode": "columns"
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {"Time": true},
+            "renameByName": {"Value": "Memory"}
+          }
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "title": "Active Processes",
+      "type": "table",
+      "datasource": {"uid": "Prometheus", "type": "prometheus"},
+      "targets": [
+        {
+          "expr": "gpu_process_memory_bytes",
+          "format": "table",
+          "instant": true
+        }
+      ],
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 4},
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {"Time": true},
+            "renameByName": {"Value": "Memory (Bytes)"}
+          }
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "title": "Node: $node",
+      "type": "row",
+      "collapsed": false,
+      "repeat": "node",
+      "repeatDirection": "v",
+      "gridPos": {"h": 1, "w": 24, "x": 0, "y": 12},
+      "panels": [
+        {
+          "id": 21,
+          "title": "Utilization",
+          "type": "timeseries",
+          "datasource": {"uid": "Prometheus", "type": "prometheus"},
+          "targets": [
+            {
+              "expr": "gpu_utilization_percent{node=~\"$node\"}",
+              "legendFormat": "GPU{{gpu_index}}"
+            }
+          ],
+          "gridPos": {"h": 7, "w": 6, "x": 0, "y": 13},
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "min": 0,
+              "max": 100,
+              "custom": {"lineWidth": 1, "fillOpacity": 10}
+            }
+          }
+        },
+        {
+          "id": 22,
+          "title": "Memory %",
+          "type": "timeseries",
+          "datasource": {"uid": "Prometheus", "type": "prometheus"},
+          "targets": [
+            {
+              "expr": "gpu_memory_used_bytes{node=~\"$node\"} / gpu_memory_total_bytes{node=~\"$node\"} * 100",
+              "legendFormat": "GPU{{gpu_index}}"
+            }
+          ],
+          "gridPos": {"h": 7, "w": 6, "x": 6, "y": 13},
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "min": 0,
+              "max": 100,
+              "custom": {"lineWidth": 1, "fillOpacity": 10}
+            }
+          }
+        },
+        {
+          "id": 23,
+          "title": "Temperature",
+          "type": "timeseries",
+          "datasource": {"uid": "Prometheus", "type": "prometheus"},
+          "targets": [
+            {
+              "expr": "gpu_temperature_celsius{node=~\"$node\"}",
+              "legendFormat": "GPU{{gpu_index}}"
+            }
+          ],
+          "gridPos": {"h": 7, "w": 6, "x": 12, "y": 13},
+          "fieldConfig": {
+            "defaults": {
+              "unit": "celsius",
+              "custom": {"lineWidth": 1, "fillOpacity": 10}
+            }
+          }
+        },
+        {
+          "id": 24,
+          "title": "Power Draw",
+          "type": "timeseries",
+          "datasource": {"uid": "Prometheus", "type": "prometheus"},
+          "targets": [
+            {
+              "expr": "gpu_power_draw_watts{node=~\"$node\"}",
+              "legendFormat": "GPU{{gpu_index}}"
+            }
+          ],
+          "gridPos": {"h": 7, "w": 6, "x": 18, "y": 13},
+          "fieldConfig": {
+            "defaults": {
+              "unit": "watt",
+              "custom": {"lineWidth": 1, "fillOpacity": 10}
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

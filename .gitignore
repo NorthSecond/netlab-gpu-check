@@ -1,0 +1,42 @@
+# ===== Python =====
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+.eggs/
+build/
+dist/
+.Python
+
+# Virtual environments
+venv/
+.venv/
+env/
+.env
+
+# ===== IDE / Editor =====
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ===== Logs =====
+*.log
+logs/
+
+# ===== Sensitive / Environment-specific config =====
+# Real Prometheus scrape targets (contains internal IPs/hostnames).
+# Copy targets.json.example -> targets.json and edit before deploying.
+server/targets.json
+
+# Local environment overrides for docker-compose (e.g. Grafana credentials)
+server/.env
+
+# Grafana / Prometheus runtime data (only relevant if mounted as bind volumes)
+server/grafana-data/
+server/prometheus-data/
