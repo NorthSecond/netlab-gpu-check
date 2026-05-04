@@ -1,10 +1,18 @@
 apiVersion: 1
 providers:
-  - name: 'default'
+  - name: 'public'
     orgId: 1
-    folder: ''
+    folder: 'Public'
     type: file
     disableDeletion: false
     editable: true
     options:
-      path: /etc/grafana/provisioning/dashboards
+      path: /etc/grafana/provisioning/dashboards/public
+  - name: 'admin'
+    orgId: 1
+    folder: 'Admin'
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/admin
