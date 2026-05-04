@@ -1,0 +1,29 @@
+global:
+  # 如果你用邮件告警，这里配置 SMTP
+  # smtp_smarthost: 'smtp.example.com:587'
+  # smtp_from: 'alert@example.com'
+  # smtp_auth_username: 'alert@example.com'
+  # smtp_auth_password: 'your-password'
+
+route:
+  group_by: ['alertname', 'instance']
+  group_wait: 10s
+  group_interval: 5m
+  repeat_interval: 12h
+  receiver: 'default'
+
+receivers:
+  - name: 'default'
+    # 方式1：Webhook（推荐，接入钉钉/企业微信/飞书等）
+    # webhook_configs:
+    #   - url: 'https://oapi.dingtalk.com/robot/send?access_token=YOUR_TOKEN'
+    #     send_resolved: true
+
+    # 方式2：邮件
+    # email_configs:
+    #   - to: 'admin@example.com'
+    #     send_resolved: true
+    #     headers:
+    #       Subject: '[GPU告警] {{ .GroupLabels.alertname }}'
+
+    # 方式3：暂时只打印到日志（不配置任何接收器，告警只会留在 Alertmanager UI）

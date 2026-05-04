@@ -1,0 +1,32 @@
+groups:
+  - name: gpu-node-alerts
+    rules:
+      # GPU 节点离线：Prometheus 无法抓取 exporter
+      - alert: GPUNodeDown
+        expr: up{job="gpu-nodes"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "GPU 节点离线: {{ $labels.instance }}"
+          description: "节点 {{ $labels.instance }} ({{ $labels.node }}) 已超过 1 分钟无法连接，GPU 监控中断。"
+
+      # GPU  exporter 运行但无 GPU 信息（可能驱动/NVML 出问题）
+      - alert: GPUInfoMissing
+        expr: up{job="gpu-nodes"} == 1 and absent(gpu_info)
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "GPU 信息缺失: {{ $labels.instance }}"
+          description: "节点 {{ $labels.instance }} 可达，但未上报 gpu_info 指标，可能是 NVIDIA 驱动或 NVML 异常。"
+
+      # 可选：单卡温度过高
+      # - alert: GPUTemperatureHigh
+      #   expr: gpu_temperature_celsius > 85
+      #   for: 5m
+      #   labels:
+      #     severity: warning
+      #   annotations:
+      #     summary: "GPU 温度过高: {{ $labels.node }} GPU{{ $labels.gpu_index }}"
+      #     description: "温度 {{ $value }}°C 已超过 85°C 持续 5 分钟。"
