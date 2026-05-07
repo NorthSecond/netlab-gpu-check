@@ -5,7 +5,6 @@ services:
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - ./targets.json:/etc/prometheus/targets.json:ro
-      - ./alerts:/etc/prometheus/alerts:ro
       - prometheus-data:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
@@ -14,19 +13,6 @@ services:
       - '--web.enable-lifecycle'
     ports:
       - "${PROMETHEUS_PORT:-9090}:9090"
-    restart: unless-stopped
-
-  alertmanager:
-    image: prom/alertmanager:latest
-    container_name: alertmanager
-    volumes:
-      - ./alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
-      - alertmanager-data:/alertmanager
-    command:
-      - '--config.file=/etc/alertmanager/alertmanager.yml'
-      - '--storage.path=/alertmanager'
-    ports:
-      - "${ALERTMANAGER_PORT:-9093}:9093"
     restart: unless-stopped
 
   grafana:
@@ -44,6 +30,12 @@ services:
       - GF_AUTH_ANONYMOUS_ENABLED=true
       - GF_AUTH_ANONYMOUS_ORG_ROLE=Viewer
       - GF_AUTH_DISABLE_LOGIN_FORM=false
+      # 启用 Grafana Unified Alerting（Grafana 9+ 默认已启用）
+      - GF_UNIFIED_ALERTING_ENABLED=true
+      # 告警评估时写入的日志级别
+      - GF_UNIFIED_ALERTING_EXECUTION_LOG_LEVEL=debug
+      # Webhook URL（从 .env 读取，避免敏感信息入 git）
+      - WEBHOOK_URL=${WEBHOOK_URL}
     depends_on:
       - prometheus
     restart: unless-stopped
@@ -51,4 +43,3 @@ services:
 volumes:
   prometheus-data:
   grafana-data:
-  alertmanager-data:

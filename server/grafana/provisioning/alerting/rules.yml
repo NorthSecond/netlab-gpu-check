@@ -1,0 +1,91 @@
+apiVersion: 1
+groups:
+  - orgId: 1
+    name: gpu-node-alerts
+    folder: Admin
+    interval: 20s
+    rules:
+      # ===========================================
+      # 告警 1: GPU 节点离线
+      # ===========================================
+      - uid: gpu-node-down
+        title: GPU Node Down
+        condition: B
+        data:
+          # A: 从 Prometheus 查询节点存活状态
+          - refId: A
+            relativeTimeRange:
+              from: 60
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: 'up{job="gpu-nodes"}'
+              refId: A
+              instant: true
+
+          # B: 阈值判断 — up < 1 时触发
+          - refId: B
+            relativeTimeRange:
+              from: 0
+              to: 0
+            datasourceUid: __expr__
+            model:
+              expression: A
+              type: threshold
+              refId: B
+              conditions:
+                - evaluator:
+                    type: lt
+                    params:
+                      - 1
+        # 没有数据时也触发告警（节点完全失联时 up 指标不存在）
+        noDataState: Alerting
+        execErrState: Error
+        for: 1m
+        annotations:
+          summary: "GPU 节点离线: {{ $labels.instance }}"
+          description: "节点 {{ $labels.instance }} 已超过 1 分钟无法连接，GPU 监控中断。"
+        labels:
+          severity: critical
+
+      # ===========================================
+      # 告警 2: GPU 信息缺失
+      # ===========================================
+      - uid: gpu-info-missing
+        title: GPU Info Missing
+        condition: B
+        data:
+          # A: 查询 gpu_info 指标数量（按 instance 分组）
+          - refId: A
+            relativeTimeRange:
+              from: 120
+              to: 0
+            datasourceUid: prometheus
+            model:
+              expr: 'count(gpu_info) by (instance)'
+              refId: A
+              instant: true
+
+          # B: 阈值判断 — gpu_info 数量为 0 时触发
+          - refId: B
+            relativeTimeRange:
+              from: 0
+              to: 0
+            datasourceUid: __expr__
+            model:
+              expression: A
+              type: threshold
+              refId: B
+              conditions:
+                - evaluator:
+                    type: lt
+                    params:
+                      - 1
+        noDataState: Alerting
+        execErrState: Error
+        for: 2m
+        annotations:
+          summary: "GPU 信息缺失: {{ $labels.instance }}"
+          description: "节点 {{ $labels.instance }} 可达，但未上报 gpu_info 指标，可能是 NVIDIA 驱动或 NVML 异常。"
+        labels:
+          severity: warning
