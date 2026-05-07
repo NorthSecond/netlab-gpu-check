@@ -55,8 +55,8 @@ cd server
 docker compose up -d
 ```
 
-- Prometheus: <http://localhost:9090>
-- Grafana:    <http://localhost:3000> （凭据来自 `server/.env`）
+- Prometheus: <http://172.18.162.4:9090>
+- Grafana:    <http://172.18.162.4:3000> （凭据来自 `server/.env`）
 
 如果 9090 / 3000 端口冲突，可以在 `server/.env` 中设置 `PROMETHEUS_PORT` /
 `GRAFANA_PORT` 覆盖。

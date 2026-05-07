@@ -34,6 +34,8 @@ services:
       - GF_UNIFIED_ALERTING_ENABLED=true
       # 告警评估时写入的日志级别
       - GF_UNIFIED_ALERTING_EXECUTION_LOG_LEVEL=debug
+      # 对外 URL（影响告警通知中的 Source/Silence 链接）
+      - GF_SERVER_ROOT_URL=${GF_SERVER_ROOT_URL:-http://localhost:3000}
       # Webhook URL（从 .env 读取，避免敏感信息入 git）
       - WEBHOOK_URL=${WEBHOOK_URL}
     depends_on:
