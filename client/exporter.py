@@ -173,11 +173,13 @@ def collect_metrics():
                     container=container or "host",
                     command=comm,
                 ).set(1)
-                gpu_process_memory_bytes.labels(
-                    gpu_index=idx,
-                    pid=str(proc.pid),
-                    container=container or "host",
-                ).set(proc.usedGpuMemory)
+                mem = proc.usedGpuMemory
+                if mem is not None:
+                    gpu_process_memory_bytes.labels(
+                        gpu_index=idx,
+                        pid=str(proc.pid),
+                        container=container or "host",
+                    ).set(mem)
         except pynvml.NVMLError as e:
             print(f"GPU {i} process query failed: {e}")
 
@@ -198,7 +200,10 @@ def main():
     print(f"GPU exporter listening on :{args.port}")
 
     while True:
-        collect_metrics()
+        try:
+            collect_metrics()
+        except Exception as e:
+            print(f"collect_metrics failed: {e}")
         time.sleep(INTERVAL)
 
 

@@ -16,7 +16,7 @@ fi
 
 echo "==> Installing dependencies"
 "${INSTALL_DIR}/venv/bin/pip" install --upgrade pip
-"${INSTALL_DIR}/venv/bin/pip" install pynvml prometheus_client
+"${INSTALL_DIR}/venv/bin/pip" install nvidia-ml-py prometheus_client
 
 echo "==> Copying exporter"
 cp "${SCRIPT_DIR}/exporter.py" "${INSTALL_DIR}/exporter.py"
