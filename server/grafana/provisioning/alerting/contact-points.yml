@@ -1,20 +1,32 @@
 apiVersion: 1
+# 一次性清理：这两个 receiver 已从本文件移除，但 Grafana 的文件化 provisioning
+# 不会自动删除已移除的条目，它们会一直挂在配置里并被投递（且指向已失效的
+# BotBuilder 地址，导致整条通知被判失败）。deleteContactPoints 是官方的
+# 声明式删除手段；生效后已从本文件移除该指令，避免重复删除报错。
+# deleteContactPoints:
+#   - orgId: 1
+#     uid: gpu-webhook-receiver-2
+#   - orgId: 1
+#     uid: dflfl1xecfoxsd
 contactPoints:
   - orgId: 1
     name: gpu-webhook
     receivers:
+      # 唯一的接收端：Grafana -> feishu-relay -> 飞书自定义机器人。
+      # 地址由 .env 的 ALERT_RELAY_URL 提供（默认 http://feishu-relay:8080/webhook）。
+      #
+      # 为什么不再直接填飞书地址：
+      #   1) 飞书 BotBuilder 触发器地址（www.feishu.cn/flow/api/trigger-webhook/...）
+      #      已于 2026-06-30 下线，现在一律返回 HTTP 403「服务已下线」；
+      #   2) 替代方案「群自定义机器人」只接受 {"msg_type":"text","content":{...}}
+      #      信封，而 Grafana 发的是自己的 JSON，飞书会拒绝。
+      #
+      # 需要同时推送到多个群时，不要在这里加第二个 receiver（会重复投递），
+      # 而是把多个 URL 写进 .env 的 FEISHU_WEBHOOK_URL（逗号分隔）。
       - uid: gpu-webhook-receiver
         type: webhook
         settings:
-          # Webhook URL 通过 .env 中的 WEBHOOK_URL 环境变量传入，避免敏感信息入 git
-          url: '${WEBHOOK_URL}'
+          url: '${ALERT_RELAY_URL}'
           httpMethod: POST
           # 发送告警恢复通知
-          disableResolveMessage: false
-      - uid: gpu-webhook-receiver-2
-        type: webhook
-        settings:
-          # 第二个 Webhook URL，通过 .env 中的 WEBHOOK_URL_2 环境变量传入
-          url: '${WEBHOOK_URL_2}'
-          httpMethod: POST
           disableResolveMessage: false

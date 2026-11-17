@@ -41,11 +41,35 @@ services:
       - GF_UNIFIED_ALERTING_EXECUTION_LOG_LEVEL=debug
       # 对外 URL（影响告警通知中的 Source/Silence 链接）
       - GF_SERVER_ROOT_URL=${GF_SERVER_ROOT_URL:-http://localhost:3000}
-      # Webhook URL（从 .env 读取，避免敏感信息入 git）
-      - WEBHOOK_URL=${WEBHOOK_URL}
-      - WEBHOOK_URL_2=${WEBHOOK_URL_2}
+      # 告警投递目标：Grafana -> feishu-relay -> 飞书自定义机器人。
+      # 飞书 BotBuilder 触发器地址（www.feishu.cn/flow/api/trigger-webhook/...）
+      # 已于 2026-06-30 下线，现在返回 HTTP 403「服务已下线」，故改走 relay。
+      - ALERT_RELAY_URL=${ALERT_RELAY_URL:-http://feishu-relay:8080/webhook}
     depends_on:
       - prometheus
+    restart: unless-stopped
+
+  # Grafana 的 webhook 载荷格式飞书不认（飞书只接受 msg_type/content 信封），
+  # 且 Grafana 没有原生飞书通道，因此用这个转换器转发。
+  feishu-relay:
+    image: python:3.11-slim
+    container_name: feishu-relay
+    command: ["python", "-u", "/app/relay.py"]
+    volumes:
+      - ./feishu-relay/relay.py:/app/relay.py:ro
+    environment:
+      # 支持多个群：URL / 加签密钥 / 关键词均可逗号分隔，按顺序对应
+      - FEISHU_WEBHOOK_URL=${FEISHU_WEBHOOK_URL:-}
+      - FEISHU_SIGN_SECRET=${FEISHU_SIGN_SECRET:-}
+      - FEISHU_KEYWORD=${FEISHU_KEYWORD:-}
+      - TZ=${TZ:-Asia/Shanghai}
+    healthcheck:
+      # TCP 探活：/healthz 在未配置 FEISHU_WEBHOOK_URL 时会返回 503，那是配置
+      # 状态而不是进程故障，不该让容器长期显示 unhealthy。
+      test: ["CMD", "python", "-c", "import socket;socket.create_connection(('127.0.0.1',8080),3)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
     restart: unless-stopped
 
 volumes:
