@@ -47,3 +47,6 @@ server/targets.d/
 
 # Pre-change backups made by tooling
 .backup/
+
+# Serena (local agent tooling) - project.yml is machine-specific here
+.serena/
