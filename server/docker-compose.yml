@@ -27,7 +27,10 @@ services:
       - grafana-data:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning:ro
     ports:
-      - "${GRAFANA_PORT:-3000}:3000"
+      # 不直接暴露在 0.0.0.0：对外统一走 grafana-proxy（可拦截泄漏端点的那个
+      # 反向代理）。这里保留一个仅本机可达的直连端口作为应急通道，
+      # 需要时 `ssh -L 3001:127.0.0.1:3001 <server>` 即可绕开代理。
+      - "127.0.0.1:${GRAFANA_DIRECT_PORT:-3001}:3000"
     environment:
       - GF_SECURITY_ADMIN_USER=${GF_SECURITY_ADMIN_USER:-admin}
       - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD:-admin}
@@ -47,6 +50,19 @@ services:
       - ALERT_RELAY_URL=${ALERT_RELAY_URL:-http://feishu-relay:8080/webhook}
     depends_on:
       - prometheus
+    restart: unless-stopped
+
+  # Grafana 的对外入口：匿名仍可看 Public 看板，但告警通知类 API 只对
+  # 已登录用户开放（匿名访客本来就能读到 contact point 里的地址）。
+  grafana-proxy:
+    image: nginx:1.27-alpine
+    container_name: grafana-proxy
+    volumes:
+      - ./proxy/grafana.conf:/etc/nginx/conf.d/default.conf:ro
+    ports:
+      - "${GRAFANA_PORT:-3000}:3000"
+    depends_on:
+      - grafana
     restart: unless-stopped
 
   # Grafana 的 webhook 载荷格式飞书不认（飞书只接受 msg_type/content 信封），
