@@ -1,14 +1,28 @@
 [Unit]
 Description=GPU Prometheus Exporter
-After=network.target
+# network-online: the exporter itself does not need the network, but starting
+# after the interface is up keeps the first scrape from racing the boot.
+Wants=network-online.target
+After=network-online.target
 
 [Service]
 Type=simple
 ExecStart=/opt/gpu-exporter/venv/bin/python /opt/gpu-exporter/exporter.py --port 9745
+# The exporter exits non-zero when NVML cannot be initialised, so a failing
+# driver ends up as a visible restart loop instead of a silently empty /metrics.
 Restart=always
-RestartSec=5
+RestartSec=10
+TimeoutStopSec=15
 StandardOutput=journal
 StandardError=journal
+
+# Hardening. NOTE: do *not* add PrivateDevices=true - NVML needs /dev/nvidia*.
+# The exporter only reads /proc/<pid>/{cgroup,comm} and talks to NVML.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+ProtectKernelTunables=true
 
 [Install]
 WantedBy=multi-user.target
