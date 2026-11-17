@@ -1,10 +1,14 @@
 services:
   prometheus:
-    image: prom/prometheus:latest
+    # Pinned: `latest` silently upgrades (and breaks) monitoring on a restart.
+    # Upgrade deliberately: bump the tag, then `docker compose up -d`.
+    image: prom/prometheus:v3.11.3
     container_name: prometheus
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - ./targets.json:/etc/prometheus/targets.json:ro
+      # Directory (not a single file) so that editors which replace the file
+      # (vim / sed -i / ansible copy) are actually picked up by file_sd.
+      - ./targets.d:/etc/prometheus/targets:ro
       - prometheus-data:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
@@ -16,7 +20,8 @@ services:
     restart: unless-stopped
 
   grafana:
-    image: grafana/grafana:latest
+    # Pinned for the same reason as Prometheus; the container was running 13.0.1.
+    image: grafana/grafana:13.0.1
     container_name: grafana
     volumes:
       - grafana-data:/var/lib/grafana
@@ -38,6 +43,7 @@ services:
       - GF_SERVER_ROOT_URL=${GF_SERVER_ROOT_URL:-http://localhost:3000}
       # Webhook URL（从 .env 读取，避免敏感信息入 git）
       - WEBHOOK_URL=${WEBHOOK_URL}
+      - WEBHOOK_URL_2=${WEBHOOK_URL_2}
     depends_on:
       - prometheus
     restart: unless-stopped

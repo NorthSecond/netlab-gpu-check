@@ -5,6 +5,10 @@ global:
 scrape_configs:
   - job_name: 'gpu-nodes'
     file_sd_configs:
+      # NOTE: mounted as a *directory*, not a single file. Replacing a
+      # bind-mounted file (vim, sed -i, ansible copy all swap the inode) leaves
+      # the container reading the old content forever; a directory mount always
+      # picks up the new file.
       - files:
-          - '/etc/prometheus/targets.json'
+          - '/etc/prometheus/targets/*.json'
         refresh_interval: 1m
