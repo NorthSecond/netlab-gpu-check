@@ -12,7 +12,7 @@
         "name": "node",
         "type": "query",
         "query": {
-          "query": "label_values(gpu_info{node!=\"server38\"}, node)",
+          "query": "label_values(gpu_info, node)",
           "refId": "PrometheusVariableQuery"
         },
         "current": {
@@ -32,7 +32,7 @@
       "id": 1,
       "title": "Avg Utilization",
       "type": "stat",
-      "datasource": {"uid": "Prometheus", "type": "prometheus"},
+      "datasource": {"uid": "prometheus", "type": "prometheus"},
       "targets": [
         {
           "expr": "avg(gpu_utilization_percent)",
@@ -61,7 +61,7 @@
       "id": 2,
       "title": "Memory Usage",
       "type": "stat",
-      "datasource": {"uid": "Prometheus", "type": "prometheus"},
+      "datasource": {"uid": "prometheus", "type": "prometheus"},
       "targets": [
         {
           "expr": "sum(gpu_memory_used_bytes) / sum(gpu_memory_total_bytes) * 100",
@@ -90,7 +90,7 @@
       "id": 3,
       "title": "Total Power",
       "type": "stat",
-      "datasource": {"uid": "Prometheus", "type": "prometheus"},
+      "datasource": {"uid": "prometheus", "type": "prometheus"},
       "targets": [
         {
           "expr": "sum(gpu_power_draw_watts)",
@@ -115,7 +115,7 @@
       "id": 4,
       "title": "GPU Count",
       "type": "stat",
-      "datasource": {"uid": "Prometheus", "type": "prometheus"},
+      "datasource": {"uid": "prometheus", "type": "prometheus"},
       "targets": [
         {
           "expr": "count(gpu_info)",
@@ -139,7 +139,7 @@
       "id": 10,
       "title": "Nodes Summary",
       "type": "table",
-      "datasource": {"uid": "Prometheus", "type": "prometheus"},
+      "datasource": {"uid": "prometheus", "type": "prometheus"},
       "targets": [
         {
           "expr": "count by (node) (gpu_info)",
@@ -227,7 +227,7 @@
           "id": 21,
           "title": "Utilization",
           "type": "timeseries",
-          "datasource": {"uid": "Prometheus", "type": "prometheus"},
+          "datasource": {"uid": "prometheus", "type": "prometheus"},
           "targets": [
             {
               "expr": "gpu_utilization_percent{node=~\"$node\"}",
@@ -248,7 +248,7 @@
           "id": 22,
           "title": "Memory %",
           "type": "timeseries",
-          "datasource": {"uid": "Prometheus", "type": "prometheus"},
+          "datasource": {"uid": "prometheus", "type": "prometheus"},
           "targets": [
             {
               "expr": "gpu_memory_used_bytes{node=~\"$node\"} / gpu_memory_total_bytes{node=~\"$node\"} * 100",
@@ -269,7 +269,7 @@
           "id": 23,
           "title": "Temperature",
           "type": "timeseries",
-          "datasource": {"uid": "Prometheus", "type": "prometheus"},
+          "datasource": {"uid": "prometheus", "type": "prometheus"},
           "targets": [
             {
               "expr": "gpu_temperature_celsius{node=~\"$node\"}",
@@ -288,7 +288,7 @@
           "id": 24,
           "title": "Power Draw",
           "type": "timeseries",
-          "datasource": {"uid": "Prometheus", "type": "prometheus"},
+          "datasource": {"uid": "prometheus", "type": "prometheus"},
           "targets": [
             {
               "expr": "gpu_power_draw_watts{node=~\"$node\"}",
