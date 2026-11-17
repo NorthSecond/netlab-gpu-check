@@ -11,3 +11,10 @@ contactPoints:
           httpMethod: POST
           # 发送告警恢复通知
           disableResolveMessage: false
+      - uid: gpu-webhook-receiver-2
+        type: webhook
+        settings:
+          # 第二个 Webhook URL，通过 .env 中的 WEBHOOK_URL_2 环境变量传入
+          url: '${WEBHOOK_URL_2}'
+          httpMethod: POST
+          disableResolveMessage: false
