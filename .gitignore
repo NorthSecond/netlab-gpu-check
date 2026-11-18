@@ -50,3 +50,6 @@ server/targets.d/
 
 # Serena (local agent tooling) - project.yml is machine-specific here
 .serena/
+
+# Test runner virtualenv (created on demand by tests/exporter/verify.sh)
+tests/.venv/
