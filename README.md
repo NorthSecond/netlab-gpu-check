@@ -9,7 +9,8 @@ server/    docker-compose.yml + prometheus.yml + targets.d/ + grafana/provisioni
            feishu-relay/relay.py    Grafana 告警 -> 飞书自定义机器人的格式转换
 scripts/   embed-client.sh（生成 remote-install.sh）/ check-embedded.sh（校验未过期）
 tests/     全部回归测试，`make test` 一条命令跑完（见 tests/README.md）
-docs/      legacy/（已废弃配置存档）、optional-alerts.md（未启用的备选告警）
+docs/      legacy/（已废弃配置存档）、optional-alerts.md（未启用的备选告警）、
+           monitoring-plan.md（监控增强实施计划：node_exporter / 进程归因 / Xid / 看板）
 ```
 
 告警链路：
