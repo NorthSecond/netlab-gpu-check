@@ -8,6 +8,7 @@ server/    docker-compose.yml + prometheus.yml + targets.d/ + grafana/provisioni
            proxy/grafana.conf       Grafana 对外入口（nginx，拦截泄漏端点）
            feishu-relay/relay.py    Grafana 告警 -> 飞书自定义机器人的格式转换
 scripts/   embed-client.sh（生成 remote-install.sh）/ check-embedded.sh（校验未过期）
+tests/     全部回归测试，`make test` 一条命令跑完（见 tests/README.md）
 docs/      legacy/（已废弃配置存档）、optional-alerts.md（未启用的备选告警）
 ```
 
@@ -368,3 +369,21 @@ docker logs grafana-proxy               # nginx 侧错误
 如果确认是代理的问题，把 `docker-compose.yml` 里 grafana 的 `ports` 改回
 `"${GRAFANA_PORT:-3000}:3000"` 并 `docker compose up -d grafana`，
 再 `docker compose stop grafana-proxy` 即可回退。
+
+## 11. 测试
+
+改动本项目后（尤其是 exporter、relay、代理、provisioning）跑一次：
+
+```bash
+make test
+```
+
+```
+static     16 passed   配置/脚本语法、promtool、embedded 同步、密钥与内网 IP 扫描
+relay      27 passed   Grafana -> 飞书 relay 的渲染/加签/关键词/错误/多目标
+exporter   25 passed   exporter 行为（mock NVML，不需要 GPU）
+proxy      17 passed   nginx 前门：匿名被拦、登录放行、公开看板不受影响
+install    15 passed   client/install.sh 端到端（容器内假 GPU 节点）
+```
+
+全部跑在 mock/容器里，不会连真实飞书、真实 Grafana 或真实 GPU。详见 `tests/README.md`。
